@@ -45,25 +45,30 @@ function MainComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-    setFieldErrors({});
-
+    setSuccess(false);
+    setLoading(true);
+  
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
+      return;
+    }
+  
     try {
       const response = await fetch("/api/createlead", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+  
       const result = await response.json();
-
+  
       if (!result.success) {
         throw new Error(result.error);
       }
-
+  
       setSuccess(true);
       setFormData({
         nome: "",
@@ -73,19 +78,18 @@ function MainComponent() {
         estado: "",
         bairro: "",
       });
-      e.target.reset();
+  
       setTimeout(() => {
         handleCloseModal();
       }, 2000);
     } catch (err) {
       console.error("Erro no formulário:", err);
-      setError(
-        err.message || "Erro ao enviar formulário. Por favor, tente novamente."
-      );
+      setError(err.message || "Erro ao enviar formulário. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
